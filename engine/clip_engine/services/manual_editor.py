@@ -269,6 +269,8 @@ async def prepare_project(request, segments, transcript, download, renderer, rev
     if not await asyncio.to_thread(move_download):
         await asyncio.to_thread(copy_source)
     os.chmod(destination, 0o600)
+    # Keep paid reviews and framing even if the local preview encoder fails.
+    atomic_json(Path(output_dir) / 'editor-project.json', project)
     loop = asyncio.get_running_loop()
     await renderer.capture_framing_source(destination, os.path.join(output_dir, 'editor-preview.mp4'),
         progress=lambda percent: loop.call_soon_threadsafe(progress, 'Preparing editor preview…', percent, 'preview'),

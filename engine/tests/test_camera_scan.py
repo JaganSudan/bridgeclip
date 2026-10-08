@@ -70,6 +70,28 @@ def test_scan_every_frame_and_preview_keeps_exact_source_timestamps(tmp_path, fp
     assert scanned_preview['frames'] == pytest.approx(scan['frames'], abs=.002)
 
 
+def test_long_timecoded_source_finalizes_preview_without_tmcd_overflow(tmp_path, available_encoder):
+    # The camera timecode becomes one packet lasting > INT_MAX microseconds.
+    # Low frame rate keeps this 36-minute regression fixture quick to encode.
+    source, preview = tmp_path / 'timecoded.mp4', tmp_path / 'preview.mp4'
+    ffmpeg(['-f', 'lavfi', '-i', 'color=c=red:s=64x64:r=1:d=2200',
+            '-c:v', 'mpeg4', '-q:v', '5', '-timecode', '01:00:00:00', str(source)])
+    def streams(path):
+        return json.loads(subprocess.check_output(['ffprobe', '-v', 'error', '-show_streams',
+            '-of', 'json', str(path)], timeout=15))['streams']
+    assert any(s['codec_tag_string'] == 'tmcd' for s in streams(source))
+    progress = []
+    asyncio.run(RenderingService().capture_framing_source(str(source), str(preview),
+        progress=progress.append, duration_ms=2200000))
+    result = streams(preview)
+    assert [s['codec_type'] for s in result] == ['video']
+    assert result[0]['time_base'] == '1/1000000'
+    assert float(result[0]['duration']) == pytest.approx(2200)
+    assert int(result[0]['nb_frames']) == 2200
+    assert progress[-1] == 100
+    assert not Path(str(preview) + '.partial.mp4').exists()
+
+
 @pytest.mark.parametrize('fps', ['24000/1001', '30000/1001'])
 @pytest.mark.parametrize('start', [0, 217, 503])
 @pytest.mark.parametrize('vfr', [False, True])

@@ -264,6 +264,10 @@ class RenderingService:
                 f"scale={out_w}:{out_h},setsar=1",
                 "-fps_mode", "passthrough", "-enc_time_base", "1:1000000",
                 *codec, "-pix_fmt", "yuv420p",
+                # An inherited tmcd track is one packet spanning the entire
+                # video. At microsecond precision, >35m47s overflows MOV's
+                # signed 32-bit packet duration during finalization.
+                "-write_tmcd", "0",
                 "-c:a", "aac", "-af", AUDIO_SYNC, "-b:a", "96k", "-movflags", "+faststart", temporary,
             ]
             if progress is None:
