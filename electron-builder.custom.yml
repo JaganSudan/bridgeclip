@@ -6,3 +6,5 @@ publish: null
 mac:
   identity: "-"
   notarize: false
+  entitlements: build/entitlements.custom.mac.plist
+  entitlementsInherit: build/entitlements.custom.mac.plist

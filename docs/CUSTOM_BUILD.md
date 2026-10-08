@@ -19,7 +19,13 @@ Run this only with matching runtime dependencies and CPU architecture, and when 
 
 The output is `dist/mac-arm64/BridgeClip Custom.app` on Apple silicon, or `dist/mac/BridgeClip Custom.app` on Intel. It has a separate bundle ID and settings directory from the official app. Enter your OpenRouter key in the custom app on first launch. The default output folder remains `~/BridgeClip`, so existing Library content is available.
 
-This local build is not signed or notarized by BridgeMind. The existing macOS updater detects that and disables automatic updates; the custom packaging configuration also disables publishing. The official app is not replaced. MIT and bundled third-party notices are retained.
+This local build is ad-hoc signed, not signed or notarized by BridgeMind. Its custom entitlements allow Electron to load the locally signed frameworks. The existing macOS updater detects the unofficial signature and disables automatic updates; the custom packaging configuration also disables publishing. The official app is not replaced. MIT and bundled third-party notices are retained.
+
+If macOS reports signing errors about resource forks or Finder metadata in a synced build folder, build outside that folder:
+
+```sh
+npm run dist:custom:mac -- --config.directories.output=/private/tmp/bridgeclip-custom-build
+```
 
 ## Checks
 
