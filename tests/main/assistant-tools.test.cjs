@@ -58,7 +58,7 @@ test('start_clip_job builds a request the Create page’s validator accepts, wit
     videoSpeed: 1,
     includeCaptions: true,
     captionPreset: 'pop',
-    includeTitle: true,
+    includeTitle: false,
     startTimeSeconds: null,
     endTimeSeconds: null,
     bannerPlatform: null,

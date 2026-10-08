@@ -16,6 +16,7 @@ import { cancelZernioConnect } from './zernio/service'
 import { isAutomationMedia, startAutomationScheduler } from './automations'
 import { sweepDeletingRuns } from './library-management'
 import { registerAssistant, type AssistantRuntime } from './assistant/ipc'
+import { APP_NAME } from '../shared/brand'
 
 // Catch crashes anywhere in the main process so we get a log line instead
 // of a silent exit. Without these, an unhandled rejection in an IPC handler
@@ -108,7 +109,7 @@ function createWindow(): void {
     minWidth: 720,
     minHeight: 520,
     show: false,
-    title: 'BridgeClip',
+    title: APP_NAME,
     icon: is.dev ? devIcon : undefined,
     // macOS-only window chrome: 'hiddenInset' and trafficLightPosition are
     // ignored on other platforms, so only pass them on darwin.
@@ -191,7 +192,7 @@ protocol.registerSchemesAsPrivileged([
 
 app.whenReady().then(() => {
   cleanStaleWorkspaces()
-  electronApp.setAppUserModelId('com.bridgemind.bridgeclip')
+  electronApp.setAppUserModelId('com.jagansudan.bridgeclip.custom')
   if (hiddenForTests) app.dock?.hide()
 
   // Boot-time diagnostic dump. This is the first thing in the log file and

@@ -72,7 +72,7 @@ export const useDraftStore = create<DraftState>((set) => ({
   maxClips: 5,
   includeCaptions: true,
   captionPreset: 'pop',
-  includeTitle: true,
+  includeTitle: false,
   trimOpen: false,
   trimStart: '',
   trimEnd: '',

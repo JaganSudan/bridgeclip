@@ -308,6 +308,48 @@ def test_title_card_can_be_turned_off(tmp_path, is_landscape):
     assert overlay_paths(include_title=False) == []
 
 
+@needs_libass
+@pytest.mark.parametrize("aspect_ratio", ["9:16", "16:9"])
+def test_headline_off_preserves_captions_in_rendered_pixels(tmp_path, monkeypatch, aspect_ratio):
+    ffmpeg, _ = FFMPEG_WITH_ASS
+    from .test_av_sync import source
+    monkeypatch.setenv("PATH", os.path.dirname(ffmpeg) + os.pathsep + os.environ.get("PATH", ""))
+    service = RenderingService()
+    service._video_codec_args = lambda *args: ["-c:v", "mpeg4", "-q:v", "2"]
+    size = (360, 640) if aspect_ratio == "9:16" else (640, 360)
+    monkeypatch.setattr(module, "get_output_dimensions", lambda *_: size)
+
+    async def plan(request, width, height, start, duration):
+        return ClipLayoutPlan([ShotLayout(0, duration, LayoutType.TALKING_HEAD)], width, height)
+
+    monkeypatch.setattr(service, "_plan_layout", plan)
+    path = source(tmp_path, duration=3)
+    transcript = [TranscriptSegment(1000, 1500, "CAPTION", words=[TranscriptWord("CAPTION", 1000, 1500)])]
+    frames = {}
+    for title, captions in [(False, False), (False, True), (True, False), (True, True)]:
+        request = RenderRequest(str(path), str(tmp_path / f"{title}-{captions}.mp4"), 0, 3000, 64, 64,
+                                pacing="natural", apply_padding=False, aspect_ratio=aspect_ratio,
+                                title_text="HEADLINE", include_title=title,
+                                transcript_segments=transcript, include_captions=captions, caption_y=.8)
+        result = asyncio.run(service.render_clip(request))
+        assert result.render_fallback is None
+        pixels = subprocess.run(
+            [ffmpeg, "-v", "error", "-ss", "1.2", "-i", result.output_path,
+             "-vf", f"scale={size[0]}:{size[1]}", "-frames:v", "1",
+             "-pix_fmt", "gray", "-f", "rawvideo", "-"], capture_output=True, check=True, timeout=120,
+        ).stdout
+        frames[title, captions] = np.frombuffer(pixels, np.uint8).reshape(size[1], size[0])
+    upper = slice(0, size[1] // 2)
+    lower = slice(size[1] // 2, size[1])
+    assert frames[False, False].mean() < 1
+    assert frames[False, True][upper].mean() < 1
+    assert np.count_nonzero(frames[False, True][lower] > 64) > 100
+    assert np.count_nonzero(frames[True, False][upper] > 64) > 100
+    assert frames[True, False][lower].mean() < 1
+    assert np.count_nonzero(frames[True, True][upper] > 64) > 100
+    assert np.count_nonzero(frames[True, True][lower] > 64) > 100
+
+
 def planner_with_state() -> IntelligencePlannerService:
     planner = IntelligencePlannerService()
     planner._current_transcript = []

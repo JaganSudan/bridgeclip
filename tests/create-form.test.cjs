@@ -109,22 +109,30 @@ test('clipping mode is selectable and economy disables paid vision in the submit
   assert.equal(buildJobRequest({ ...draft, clippingMode: 'quality' }, { start: null, end: null }).layoutVision, true)
 })
 
-test('the title card is shown by default and can be turned off for automatic runs', () => {
+test('headlines default off and can be enabled independently of captions', () => {
   const { CaptionsStep, useDraftStore, buildJobRequest } = form.exports
   const original = useDraftStore.getState()
   try {
-    assert.equal(original.includeTitle, true)
+    assert.equal(original.includeTitle, false)
     original.update({ workflow: 'automatic', source: 'https://example.com/video' })
     const automatic = renderToStaticMarkup(React.createElement(CaptionsStep, { draft: useDraftStore.getState(), update() {} }))
-    assert.match(automatic, /Show title at the top/)
-    assert.equal(buildJobRequest(useDraftStore.getState(), { start: null, end: null }).includeTitle, true)
+    assert.match(automatic, /Burn in headline/)
+    assert.equal(buildJobRequest(useDraftStore.getState(), { start: null, end: null }).includeTitle, false)
+    for (const includeTitle of [false, true]) {
+      for (const includeCaptions of [false, true]) {
+        original.update({ includeTitle, includeCaptions })
+        const request = buildJobRequest(useDraftStore.getState(), { start: null, end: null })
+        assert.equal(request.includeTitle, includeTitle)
+        assert.equal(request.includeCaptions, includeCaptions)
+      }
+    }
     original.update({ includeTitle: false })
     assert.equal(buildJobRequest(useDraftStore.getState(), { start: null, end: null }).includeTitle, false)
     original.startAnother()
     assert.equal(useDraftStore.getState().includeTitle, false)
     // Review exports never draw a title card, so the switch is not offered there.
     const review = renderToStaticMarkup(React.createElement(CaptionsStep, { draft: { ...useDraftStore.getState(), workflow: 'review' }, update() {} }))
-    assert.doesNotMatch(review, /Show title at the top/)
+    assert.doesNotMatch(review, /Burn in headline/)
   } finally { useDraftStore.setState(original) }
 })
 

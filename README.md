@@ -1,3 +1,9 @@
+## BridgeClip Custom
+
+Personal fork: **Create > Automatic > Captions > Burn in headline** is off by default, independently of captions. Clip titles remain in the Library. Review & edit exports already omit title overlays. New settings apply to newly generated clips; existing rendered videos must be regenerated.
+
+See [the custom build guide](docs/CUSTOM_BUILD.md) for the separate macOS app and build instructions. The upstream implementation of the title switch is retained from commit `8d6bfab`; this fork changes its default and labeling.
+
 <h1 align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="resources/bridgeclip-logo.svg" />

@@ -295,7 +295,7 @@ test('a check that finds an update downloads it, then it is ready to install', a
   assert.deepEqual(t.updater.installs, [[false, true]])
 
   await t.invoke('update:openReleaseNotes')
-  assert.deepEqual(t.opened, ['https://github.com/bridge-mind/bridgeclip/releases/tag/v0.1.18'])
+  assert.deepEqual(t.opened, ['https://github.com/JaganSudan/bridgeclip/releases/tag/v0.1.18'])
 })
 
 test('an install failure after "ready" (Squirrel rejecting the signature) is reported and can be retried', async () => {

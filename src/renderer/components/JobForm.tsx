@@ -515,9 +515,9 @@ export function CaptionsStep({ draft, update }: { draft: ClipDraft; update: Upda
     <div className="space-y-3">
       {draft.workflow !== 'review' && (
         <SettingRow
-          title="Show title at the top"
-          description="Each clip's title over the video. Turn off to leave it out."
-          control={<Switch label="Title at the top" checked={draft.includeTitle} onChange={(includeTitle) => update({ includeTitle })} />}
+          title="Burn in headline"
+          description="Clip title overlay"
+          control={<Switch label="Burn in headline" checked={draft.includeTitle} onChange={(includeTitle) => update({ includeTitle })} />}
         />
       )}
       <SettingRow
@@ -568,7 +568,7 @@ function ReviewStep({ draft, trim, onEdit }: {
     { step: 'clips', label: 'What to clip', value: draft.clipRequest?.trim() || 'The best moments' },
     { step: 'captions', label: 'Captions', value: draft.includeCaptions ? CAPTION_PRESET_NAMES[draft.captionPreset] ?? draft.captionPreset : 'Off' }
   ]
-  if (draft.workflow !== 'review') rows.push({ step: 'captions', label: 'Title', value: draft.includeTitle ? 'Shown at the top' : 'Off' })
+  if (draft.workflow !== 'review') rows.push({ step: 'captions', label: 'Headline', value: draft.includeTitle ? 'Burned in' : 'Off' })
   if (draft.clippingMode === 'advanced') rows.splice(5, 0,
     { step: 'clips', label: 'Transcribe', value: draft.transcriptionModel || 'Choose a model' },
     { step: 'clips', label: 'Plan', value: draft.plannerModel || 'Choose a model' })

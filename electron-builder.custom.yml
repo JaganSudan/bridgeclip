@@ -1,0 +1,8 @@
+extends: ./electron-builder.yml
+appId: com.jagansudan.bridgeclip.custom
+productName: BridgeClip Custom
+artifactName: BridgeClip-Custom-${version}-${os}-${arch}.${ext}
+publish: null
+mac:
+  identity: "-"
+  notarize: false
